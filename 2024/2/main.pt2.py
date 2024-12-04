@@ -1,6 +1,60 @@
+def backtrack(l, prev_idx, curr_idx, violations, inc):
+    print(prev_idx, curr_idx, violations, inc)
+
+    if violations > 1:
+        return False
+
+    if curr_idx == len(l):
+        return True
+
+    safe = True
+
+    if prev_idx != None:
+        if inc is None:
+            if l[curr_idx] > l[prev_idx]:
+                inc = True
+            elif l[curr_idx] < l[prev_idx]:
+                inc = False
+
+        if inc:
+            if l[curr_idx] > l[prev_idx]:
+                if l[curr_idx] - l[prev_idx] < 1 or l[curr_idx] - l[prev_idx] > 3:
+                    safe = False
+            else:
+                safe = False
+        elif not inc:
+            if l[curr_idx] < l[prev_idx]:
+                if l[prev_idx] - l[curr_idx] < 1 or l[prev_idx] - l[curr_idx] > 3:
+                    safe = False
+            else:
+                safe = False
+
+    if safe == False and violations > 0:
+        # Save some time by returning early if we're already in an invalid path
+        return False
+    else:
+        # Special case where we're skipping index 1. We've already set inc and
+        # that might cause a problem if the list is decreasing but only the
+        # first two elements are increasing or vice-versa.
+        # Example: [7, 9, 6, 5, 4]
+        
+        if safe == False:
+            # We have to skip
+            if curr_idx == 1:
+                return backtrack(l, prev_idx, curr_idx + 1, violations + 1, None)
+            else:
+                return backtrack(l, prev_idx, curr_idx + 1, violations + 1, inc)
+        else:
+            # Try both paths where we either skip or don't skip
+            if curr_idx == 1:
+                return backtrack(l, curr_idx, curr_idx + 1, violations, inc) or \
+                        backtrack(l, prev_idx, curr_idx + 1, violations + 1, None)
+            else:
+                return backtrack(l, curr_idx, curr_idx + 1, violations, inc) or \
+                    backtrack(l, prev_idx, curr_idx + 1, violations + 1, inc)
 
 def main():
-    f = open("./small_input.txt", "r")
+    f = open("./input.txt", "r")
 
     ans = 0
     for line in f:
@@ -10,42 +64,9 @@ def main():
         inc = None
         safe = False
         for i in range(len(l)):
-            print(i, violations)
             l[i] = int(l[i])
 
-            if i == 0:
-                continue
-
-            if inc is None:
-                if l[i] > l[i - 1]:
-                    inc = True
-                elif l[i] < l[i - 1]:
-                    inc = False
-
-            if inc:
-                if l[i] > l[i - 1]:
-                    if l[i] - l[i - 1] < 1 or l[i] - l[i - 1] > 3:
-                        violations += 1
-                else:
-                    violations += 1
-            elif not inc:
-                if l[i] < l[i - 1]:
-                    if l[i - 1] - l[i] < 1 or l[i - 1] - l[i] > 3:
-                        violations += 1
-                else:
-                    violations += 1
-
-            if violations == 1:
-                l.pop(i)
-                i -= 1
-                continue
-            elif violations > 1:
-                break
-
-            if i == len(l) - 1:
-                safe = True
-
-        if safe:
+        if backtrack(l, None, 0, 0, None):
             ans += 1
 
     print(ans)
