@@ -1,4 +1,9 @@
 
+def swap(l, i, j):
+    a = l[i]
+    l[i] = l[j]
+    l[j] = a
+
 def main():
     f = open("./input.txt", "r")
 
@@ -39,11 +44,11 @@ def main():
                 for j in range(i + 1, len(l)):
                     if (l[i] in rules_before and l[j] in rules_before[l[i]]):
                         correctly_ordered = False
-                        break
-                if not correctly_ordered:
-                    break
+                        swap(l, i, j)
+                        j = i
+                        continue
 
-            if correctly_ordered:
+            if not correctly_ordered:
                 ans += l[len(l) // 2]
     print(ans)
 
