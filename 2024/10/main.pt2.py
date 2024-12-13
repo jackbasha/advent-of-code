@@ -23,50 +23,30 @@ class Solver:
             for j in range(m):
                 self.arr[i][j] = arr[i][j]
 
-    # There is a huge room for memoization here if a number can reach k many
-    # 9's, then that can be momized and reused in future iterations
-
-    # Current thought is how to record the number of 9's that can be reached
-    # and without passing a truth table as a parameter as that's quite
-    # inefficient... Maybe define it as a class variable?
-    
-    # New thought: Use a set and use set.add() to add elements. It does not
-    # allow for duplicates. Just need to define a Point class and an __eq__
-    # method so that elements can be compared by the set
-
-    # Memoization was overcountaing something... need to investigate why.
-    # Difference was between 557 and 640.
-
     def correct_indices(self, i, j):
         return i >= 0 and i < self.n and j >= 0 and j < self.m
 
-    def solve(self, i, j, curr, reached_nines):
+    def solve(self, i, j, curr):
         if self.arr[i][j] != curr:
-            return reached_nines
+            return 0
 
         if curr == 9:
-            reached_nines.add(Point(i, j))
-            return reached_nines
+            return 1
 
-        # if self.memoization[i][j] != None:
-        #     return self.memoization[i][j]
+        if self.memoization[i][j] != None:
+            return self.memoization[i][j]
 
+        ans = 0
         for d in range(4):
             new_i = i + self.DIR_X[d]
             new_j = j + self.DIR_Y[d]
 
             if self.correct_indices(new_i, new_j):
-                k = set()
-                s = self.solve(new_i, new_j, curr + 1, reached_nines)
+                ans += self.solve(new_i, new_j, curr + 1)
 
-                k = k.union(s)
-                # if(self.memoization[i][j] == None):
-                #     self.memoization[i][j] = s
-                # else:
-                #     self.memoization[i][j] = self.memoization[i][j].union(s)
+        self.memoization[i][j] = ans
 
-        return k
-
+        return ans
 
     def init_solve(self):
         ans = 0
@@ -74,11 +54,11 @@ class Solver:
         for i in range(self.n):
             for j in range(self.m):
                 if self.arr[i][j] == 0:
-                    s = self.solve(i, j, 0, set())
+                    s = self.solve(i, j, 0)
                     print(i, j, s)
-                    ans += len(s)
+                    ans += s
 
-        return ans      
+        return ans
 
 def main():
     f = open("./input.txt", "r")
