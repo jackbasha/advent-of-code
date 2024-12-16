@@ -1,87 +1,113 @@
-from dataclasses import dataclass
+from enum import Enum
 
-@dataclass(frozen=True)
-class Point:
-    x: int
-    y: int
 
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
+class NumValue(Enum):
+    ZERO = 0
+    DOUBLE_DIGITS = 1
+    OTHER = 2
 
 class Solver:
-    def __init__(self, n, m, arr):
+    def __init__(self, n, blinks, arr):
         self.n = n
-        self.m = m
+        self.blinks = blinks
+        self.nums = self.default_dict()
 
-        self.DIR_X = [1, -1, 0, 0]
-        self.DIR_Y = [0, 0, 1, -1]
-        
-        self.memoization = [[None for j in range(m)] for i in range(n)]
-        self.arr = [[None for j in range(m)] for i in range(n)]
+        self.zm = []
+        self.zero_memoization()
+
+        print("Done 0 memo")
 
         for i in range(n):
-            for j in range(m):
-                self.arr[i][j] = arr[i][j]
+            self.classify_and_append(arr[i], self.nums)
 
-    def correct_indices(self, i, j):
-        return i >= 0 and i < self.n and j >= 0 and j < self.m
+    def default_dict(self):
+        return {
+            NumValue.ZERO: [],
+            NumValue.DOUBLE_DIGITS: [],
+            NumValue.OTHER: [],
+        }
 
-    def solve(self, i, j, curr):
-        if self.arr[i][j] != curr:
-            return 0
+    def zero_memoization(self):
+        temp = self.default_dict()
+        new_temp = self.default_dict()
 
-        if curr == 9:
-            return 1
+        temp[NumValue.ZERO].append(0)
 
-        if self.memoization[i][j] != None:
-            return self.memoization[i][j]
+        for i in range(self.blinks):
+            new_temp[NumValue.OTHER].extend([1] * len(temp[NumValue.ZERO]))
+            
+            for v in temp[NumValue.DOUBLE_DIGITS]:
+                l = len(str(v))
+                x, y = str(v)[:l // 2], str(v)[l // 2:]
+                # print(x, y)
+                
+                self.classify_and_append(int(x), new_temp)
+                self.classify_and_append(int(y), new_temp)
+            
+            for v in temp[NumValue.OTHER]:
+                self.classify_and_append(v * 2024, new_temp)
 
+            temp = new_temp
+            new_temp = self.default_dict()
+
+            self.zm.append(
+                len(temp[NumValue.ZERO])
+                + len(temp[NumValue.DOUBLE_DIGITS])
+                + len(temp[NumValue.OTHER])
+            )
+
+            print(i, len(temp[NumValue.ZERO]), len(temp[NumValue.DOUBLE_DIGITS]), len(temp[NumValue.OTHER]))
+
+    def is_even_digits(self, i):
+        return len(str(i)) % 2 == 0
+
+    def classify_and_append(self, x, arr):
+        if (x == 0):
+            arr[NumValue.ZERO].append(x)
+        elif (self.is_even_digits(x)):
+            arr[NumValue.DOUBLE_DIGITS].append(x)
+        else:
+            arr[NumValue.OTHER].append(x)
+
+    def solve(self):
         ans = 0
-        for d in range(4):
-            new_i = i + self.DIR_X[d]
-            new_j = j + self.DIR_Y[d]
+        new_nums = self.default_dict()
 
-            if self.correct_indices(new_i, new_j):
-                ans += self.solve(new_i, new_j, curr + 1)
+        for i in range(self.blinks):
+            ans += len(self.nums[NumValue.ZERO]) * self.zm[self.blinks - (i + 1)]
+            
+            for v in self.nums[NumValue.DOUBLE_DIGITS]:
+                l = len(str(v))
+                x, y = str(v)[:l // 2], str(v)[l // 2:]
+                # print(x, y)
+                
+                self.classify_and_append(int(x), new_nums)
+                self.classify_and_append(int(y), new_nums)
+            
+            for v in self.nums[NumValue.OTHER]:
+                self.classify_and_append(v * 2024, new_nums)
 
-        self.memoization[i][j] = ans
+            # print(self.nums, new_nums)
 
-        return ans
+            self.nums = new_nums
+            new_nums = self.default_dict()
 
-    def init_solve(self):
-        ans = 0
+            # print(self.nums, new_nums)
+            # return
 
-        for i in range(self.n):
-            for j in range(self.m):
-                if self.arr[i][j] == 0:
-                    s = self.solve(i, j, 0)
-                    print(i, j, s)
-                    ans += s
-
-        return ans
+        return ans \
+            + len(self.nums[NumValue.DOUBLE_DIGITS]) \
+            + len(self.nums[NumValue.OTHER])
 
 def main():
     f = open("./input.txt", "r")
+    s = f.read().strip().split()
 
-    ans = 0
+    l = list(map(lambda x: int(x), s))
+    n = len(l)
 
-    topo_map = []
-    n = None
-    m = None
-
-    for line in f:
-        l = list(map(lambda x: int(x), line.strip()))
-        topo_map.append(l)
-
-        if m == None:
-            m = len(l)
-
-    if n == None:
-        n = len(topo_map)
-
-    print(n, m)
-    s = Solver(n, m, topo_map)
-    ans = s.init_solve()
+    s = Solver(n, 75, l)
+    ans = s.solve()
 
     print(ans)
 

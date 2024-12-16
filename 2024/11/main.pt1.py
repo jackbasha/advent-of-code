@@ -1,13 +1,16 @@
 from enum import Enum
 
+
 class NumValue(Enum):
     ZERO = 0
     DOUBLE_DIGITS = 1
     OTHER = 2
 
 class Solver:
-    def __init__(self, n, arr):
+    def __init__(self, n, blinks, arr):
         self.n = n
+        self.blinks = blinks
+
         self.nums = {
             NumValue.ZERO: [],
             NumValue.DOUBLE_DIGITS: [],
@@ -15,48 +18,56 @@ class Solver:
         }
 
         for i in range(n):
-            if (arr[i] == 0):
-                self.nums[NumValue.ZERO].append(i)
-            elif (self.is_even_digits(arr[i])):
-                self.nums[NumValue.DOUBLE_DIGITS].append(i)
-            else:
-                self.nums[NumValue.OTHER].append(i)
+            self.classify_and_append(arr[i], self.nums)
 
     def is_even_digits(self, i):
         return len(str(i)) % 2 == 0
 
-    def solve(self, i, j, area, perimeter, curr_letter):
-        if (self.visited[i][j] == True):
-            return area, perimeter
-        
-        self.visited[i][j] = True
-        area += 1
+    def classify_and_append(self, x, arr):
+        if (x == 0):
+            arr[NumValue.ZERO].append(x)
+        elif (self.is_even_digits(x)):
+            arr[NumValue.DOUBLE_DIGITS].append(x)
+        else:
+            arr[NumValue.OTHER].append(x)
 
-        for d in range(4):
-            new_i = i + self.DIR_X[d]
-            new_j = j + self.DIR_Y[d]
+    def solve(self):
+        new_nums = {
+            NumValue.ZERO: [],
+            NumValue.DOUBLE_DIGITS: [],
+            NumValue.OTHER: [],
+        }
 
-            if (not self.correct_indices(new_i, new_j)):
-                perimeter += 1
+        for i in range(self.blinks):
+            for v in range(len(self.nums[NumValue.ZERO])):
+                new_nums[NumValue.OTHER].append(1)
+            
+            for v in self.nums[NumValue.DOUBLE_DIGITS]:
+                l = len(str(v))
+                x, y = str(v)[:l // 2], str(v)[l // 2:]
+                # print(x, y)
+                
+                self.classify_and_append(int(x), new_nums)
+                self.classify_and_append(int(y), new_nums)
+            
+            for v in self.nums[NumValue.OTHER]:
+                self.classify_and_append(v * 2024, new_nums)
 
-            if (self.correct_indices(new_i, new_j)):
-                if (self.arr[new_i][new_j] == curr_letter):
-                    area, perimeter = self.solve(new_i, new_j, area, perimeter, curr_letter)
-                elif (self.arr[new_i][new_j] != curr_letter):
-                    perimeter += 1
+            # print(self.nums, new_nums)
 
-        return area, perimeter
-    
-    def init_solve(self):
-        ans = 0
+            self.nums = new_nums
+            new_nums = {
+                NumValue.ZERO: [],
+                NumValue.DOUBLE_DIGITS: [],
+                NumValue.OTHER: [],
+            }
 
-        for i in range(self.n):
-            for j in range(self.m):
-                if (self.visited[i][j] == False):
-                    a, p = self.solve(i, j, 0, 0, self.arr[i][j])
-                    ans += a * p
+            # print(self.nums, new_nums)
+            # return
 
-        return ans
+        return len(self.nums[NumValue.ZERO]) \
+            + len(self.nums[NumValue.DOUBLE_DIGITS]) \
+            + len(self.nums[NumValue.OTHER])
 
 def main():
     f = open("./input.txt", "r")
@@ -65,8 +76,8 @@ def main():
     l = list(map(lambda x: int(x), s))
     n = len(l)
 
-    s = Solver(n, l)
-    ans = s.init_solve()
+    s = Solver(n, 25, l)
+    ans = s.solve()
 
     print(ans)
 
