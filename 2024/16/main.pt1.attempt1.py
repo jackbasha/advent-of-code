@@ -9,24 +9,7 @@ class DIRECTIONS(Enum):
     SOUTH = 2
     WEST = 3
 
-class MemoInstance:
-    def __init__(self, val=None, dir=None):
-        self.val = np.inf if val == None else val
-        self.dir = 'Z' if dir == None else dir
-    
-    def __eq__(self, other):
-        return self.val == other.val
-
-    def __le__(self, other):
-        return self.val <= other.val
-
-    def __gt__(self, other):
-        return self.val > other.val
-
-    def __repr__(self):
-        return str(self.val) + ", " + self.dir
-
-def tranlate_direction(dir):
+def translate_direction(dir):
     if (dir == 'S'):
         return DIRECTIONS.SOUTH.value
     elif (dir == 'N'):
@@ -59,7 +42,6 @@ class Solver:
         self.best_known_cost = np.inf
         self.visited = [[False for j in range(len(grid[0]))] for i in range(len(grid))]
         self.memo = [[MemoInstance() for j in range(len(grid[0]))] for i in range(len(grid))]
-        self.cost = [[MemoInstance() for j in range(len(grid[0]))] for i in range(len(grid))]
 
     def solve(self, i, j, dir, cost):
         print(i, j)
@@ -73,7 +55,7 @@ class Solver:
         # if (cost >= self.best_known_cost):
         #     return np.inf
 
-        ts = tranlate_direction(dir)
+        ts = translate_direction(dir)
         print(ts, dir)
         
         if (self.visited[i][j]):
@@ -105,7 +87,7 @@ class Solver:
             exit
 
         for d in rotation_options(dir):
-            ts = tranlate_direction(d)
+            ts = translate_direction(d)
             ts_coords = translate_direction_to_coords(d)
 
             self.memo[i][j] = min(
