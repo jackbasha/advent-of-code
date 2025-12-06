@@ -40,47 +40,36 @@ class Solver:
         self.grid = grid
         # self.DIRECTIONS = ['S', 'N', 'E', 'W']
         self.best_known_cost = np.inf
-        self.visited = [[False for j in range(len(grid[0]))] for i in range(len(grid))]
-        self.memo = [[MemoInstance() for j in range(len(grid[0]))] for i in range(len(grid))]
+        self.visited = [[([False] * 4) for j in range(len(grid[0]))] for i in range(len(grid))]
+        self.memo = [[([np.inf] * 4) for j in range(len(grid[0]))] for i in range(len(grid))]
 
-    def solve(self, i, j, dir, cost):
-        print(i, j)
-
+    # Our state is i, j, and dir
+    def solve(self, i, j, dir):
+        # Stop condition
         if (self.grid[i][j] == 'E'):
             # Use for early terminating
-            self.best_known_cost = min(self.best_known_cost, cost)
-            self.cost[i][j] = min(self.cost[i][j], MemoInstance(cost, 'Z'))
-            return MemoInstance(cost, dir)
+            # self.best_known_cost = min(self.best_known_cost, cost)
+            return 0
 
         # if (cost >= self.best_known_cost):
         #     return np.inf
 
         ts = translate_direction(dir)
-        print(ts, dir)
+        # print(ts, dir)
         
-        if (self.visited[i][j]):
-            ret = None
-
-            if (dir != self.memo[i][j].dir):
-                ret = MemoInstance(self.memo[i][j].val + 1000, self.memo[i][j].dir)
-            else:
-                ret = MemoInstance(self.memo[i][j].val, self.memo[i][j].dir)
-            
-            self.cost[i][j] = min(self.cost[i][j], MemoInstance(cost, dir))
-            return ret
+        if (self.visited[i][j][ts]):
+            return self.memo[i][j][ts]
         
-        self.visited[i][j] = True
-        self.cost[i][j].val = cost
-        self.cost[i][j].dir = dir
+        self.visited[i][j][ts] = True
 
         if (self.grid[i][j] == '#'):
-            return MemoInstance(np.inf, None)
+            return np.inf
 
         ts_coords = translate_direction_to_coords(dir)
         try:
-            self.memo[i][j] = min(
-                self.memo[i][j],
-                self.solve(i + ts_coords[0], j + ts_coords[1], dir, cost + 1)
+            self.memo[i][j][ts] = min(
+                self.memo[i][j][ts],
+                self.solve(i + ts_coords[0], j + ts_coords[1], dir) + 1
             )
         except TypeError:
             print(self.memo[i][j], self.solve(i + ts_coords[0], j + ts_coords[1], dir, cost + 1))
@@ -90,12 +79,12 @@ class Solver:
             ts = translate_direction(d)
             ts_coords = translate_direction_to_coords(d)
 
-            self.memo[i][j] = min(
-                self.memo[i][j],
-                self.solve(i + ts_coords[0], j + ts_coords[1], d, cost + 1001)
+            self.memo[i][j][ts] = min(
+                self.memo[i][j][ts],
+                self.solve(i + ts_coords[0], j + ts_coords[1], d) + 1001
             )
 
-        return self.memo[i][j]
+        return self.memo[i][j][ts]
 
 def main():
     f = open("/home/jack/projects/advent-of-code/2024/16/small_input2.txt", "r")
@@ -113,7 +102,7 @@ def main():
                 start = (len(grid) - 1, j)
 
     solver = Solver(grid)
-    ans = solver.solve(start[0], start[1], 'E', 0)
+    ans = solver.solve(start[0], start[1], 'E')
     print(list(print(i) for i in solver.memo))
     
     print(list(print(i) for i in solver.cost))
