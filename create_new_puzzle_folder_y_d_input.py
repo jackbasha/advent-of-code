@@ -24,7 +24,7 @@ def main():
         print("Folder already exists, refetching input only...")
     else:
         os.makedirs(dir_to_make)
-        shutil.copy(curr_dir / "_temp_file.py", dir_to_make / "main.py")
+        shutil.copy(curr_dir / "_init_main_file.py", dir_to_make / "main.py")
 
     # Write input data to input.txt file
     f = open(dir_to_make / "input.txt", "w")
