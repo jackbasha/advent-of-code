@@ -24,6 +24,26 @@ def part1(input_data):
     return str(ans)
 
 def part2(input_data):
+    def count_left_rotations(curr, ans, rotation):
+        if (rotation >= curr):
+            if (curr != 0):
+                # Hit 0, add 1 to ans
+                rotation -= curr
+                ans += 1
+
+            curr = (100 - (rotation % 100)) % 100
+            ans += rotation // 100
+        else:
+            curr -= rotation
+
+        return curr, ans
+
+    def count_right_rotations(curr, ans, rotation):
+        ans += (curr + rotation) // 100
+        curr = (curr + rotation) % 100
+
+        return curr, ans
+
     ans = 0
     curr = 50
 
@@ -33,40 +53,14 @@ def part2(input_data):
     for l in input_data:
         n = int(l.strip()[1:])
 
+        # print("Before adding", curr, curr + n)
+
         if (l[0] == "L"):
-            n = n * -1
+            curr, ans = count_left_rotations(curr, ans, n)
+        else:
+            curr, ans = count_right_rotations(curr, ans, n)
 
-        # if ((curr + n) % 100 != 0):
-
-        # If it's a one pass through 0, add one to the answer
-        print("Before adding", curr, curr + n)
-
-        # if (curr < 0 and (curr + n) > 0):
-        #     print("Cond 1 true")
-
-        # if (curr > 0 and (curr + n) < 0):
-        #     print("Cond 2 true")
-
-        if ((curr < 0 and (curr + n) > 0) or (curr > 0 and (curr + n) < 0)):
-            # print("One of the conds is true")
-            ans += 1
-
-        # Count the extra spins
-        print("Extra spins for", abs(curr + n), "are", (abs(curr + n) // 100))
-
-        # If we land on 0, we're counting one extra
-        if ((curr + n) % 100 == 0):
-            ans -= 1
-
-        ans += (abs(curr + n) // 100)
-
-        curr = (curr + n) % 100
-        # print(curr)
-
-        if (curr == 0):
-            ans += 1
-
-        print("After adding", curr, ans)
+        # print("After adding", curr, ans)
     
     return str(ans)
 
@@ -105,11 +99,11 @@ def main():
     curr_dir = pathlib.Path(__file__).parent.resolve()
     input_data = get_data_from_file_path(curr_dir / "input.txt")
 
-    # p1 = part1(input_data)
-    # p2 = part2(input_data)
+    p1 = part1(input_data)
+    p2 = part2(input_data)
 
-    # print("Answer for part 1", p1)
-    # print("Answer for part 2", p2)
+    print("Answer for part 1", p1)
+    print("Answer for part 2", p2)
 
 if __name__ == "__main__":
     main()
