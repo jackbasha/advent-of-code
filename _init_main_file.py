@@ -2,11 +2,11 @@ import pathlib
 import os
 
 
-def part1():
+def part1(input_data):
     # Replace this with the solution for part 1
     return str(ans)
 
-def part2():
+def part2(input_data):
     # Replace this with the solution for part 2
     return str(ans)
 
