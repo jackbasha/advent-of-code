@@ -1,13 +1,15 @@
-import pathlib
 import os
+import pathlib
 
 
 def part1(input_data):
     # Replace this with the solution for part 1
+    ans = 0
     return str(ans)
 
 def part2(input_data):
     # Replace this with the solution for part 2
+    ans = 0
     return str(ans)
 
 
@@ -34,10 +36,10 @@ def verify_against_sample_input():
             p2 = part2(example_data)
 
             if p1 != ans_a:
-                print("Output of part 1 `" + p1 + "` doesn't match the answer:", ans_a)
+                print("Output of part 1,", p1, ", doesn't match the answer: ", ans_a)
 
             if p2 != ans_b:
-                print("Output of part 2 `" + p2 + "` doesn't match the answer:", ans_b)
+                print("Output of part 2,", p2, ", doesn't match the answer: ", ans_b)
 
 def main():
     verify_against_sample_input()
@@ -46,9 +48,9 @@ def main():
     input_data = get_data_from_file_path(curr_dir / "input.txt")
 
     p1 = part1(input_data)
-    p2 = part2(input_data)
-
     print("Answer for part 1", p1)
+
+    p2 = part2(input_data)
     print("Answer for part 2", p2)
 
 if __name__ == "__main__":
