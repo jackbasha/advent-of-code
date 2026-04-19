@@ -37,9 +37,11 @@ def verify_against_sample_input():
 
             if p1 != ans_a:
                 print("Output of part 1,", p1, ", doesn't match the answer: ", ans_a)
+                raise Exception("Output is incorrect for part 1")
 
             if p2 != ans_b:
                 print("Output of part 2,", p2, ", doesn't match the answer: ", ans_b)
+                raise Exception("Output is incorrect for part 2")
 
 def main():
     verify_against_sample_input()
